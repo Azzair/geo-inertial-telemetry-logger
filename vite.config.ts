@@ -7,7 +7,7 @@ import mkcert from "vite-plugin-mkcert";
 
 export default defineConfig(() => {
   return {
-    base: "/geo-inertial-telemetry-logger/", // Вкажіть тут назву вашого репозиторію на GitHub
+    base: "/geo-inertial-telemetry-logger/",
     plugins: [
       react(),
       mkcert(),
