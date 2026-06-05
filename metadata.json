@@ -1,0 +1,6 @@
+{
+  "name": "Geo-Inertial Telemetry Logger",
+  "description": "Високоточний логер GPS (10-20Гц екстраполяція) та інерціальних датчиків з фільтрацією, інтегруванням швидкості та експортом CSV",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

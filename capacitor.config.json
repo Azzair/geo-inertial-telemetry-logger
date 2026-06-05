@@ -1,0 +1,10 @@
+{
+  "appId": "com.telem.geoinertial.app",
+  "appName": "Geo-Inertial Telemetry Suite",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https",
+    "allowNavigation": []
+  }
+}
