@@ -1,8 +1,10 @@
 {
   "name": "Geo-Inertial Telemetry Suite",
   "short_name": "GeoTelemetry",
+
   "description": "Високоточний логер GPS координат та інерціальних сенсорів (акселерометр, гіроскоп) для аналізу поїздок.",
   "start_url": "/geo-inertial-telemetry-logger/",
+
   "display": "standalone",
   "background_color": "#020617",
   "theme_color": "#020617",
