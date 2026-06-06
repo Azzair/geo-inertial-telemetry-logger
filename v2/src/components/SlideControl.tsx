@@ -283,7 +283,7 @@ export default function SlideControl({
                     className="bg-slate-900 border border-slate-800 text-slate-300 text-[10px] font-mono font-bold rounded px-1.5 py-1 focus:outline-none focus:border-cyan-500"
                     id="select_acoustic_cylinders"
                   >
-                    {[2, 3, 4, 5, 6, 8].map((c) => (
+                    {[1, 2, 3, 4, 5, 6, 8, 10, 12].map((c) => (
                       <option key={c} value={c}>
                         {c}-цил. двигун
                       </option>

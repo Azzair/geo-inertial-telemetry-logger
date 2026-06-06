@@ -95,9 +95,9 @@ export function useAcousticRpm(): AcousticRpmHook {
         const sampleRate = ctx.sampleRate;
         const binHz = sampleRate / analyser.fftSize;
 
-        // Custom search ranges for car engine sounds (normally 15Hz to 250Hz covers 450 RPM - 7500 RPM for 4 cylinders)
-        const minFreq = 15;
-        const maxFreq = 250;
+        // Custom search ranges for car engine sounds supporting up to 22000 RPM
+        const minFreq = 10;
+        const maxFreq = Math.max(250, Math.round((22000 * acousticCylindersRef.current) / 120) + 100);
 
         let maxVal = -Infinity;
         let maxIdx = -1;
@@ -136,7 +136,7 @@ export function useAcousticRpm(): AcousticRpmHook {
           const lastVal = acousticRpmRef.current !== null ? acousticRpmRef.current : rawRpm;
           const smoothedRpm = smoothAlpha * rawRpm + (1 - smoothAlpha) * lastVal;
 
-          const finalRpm = Math.max(500, Math.min(8000, smoothedRpm));
+          const finalRpm = Math.max(500, Math.min(22000, smoothedRpm));
 
           acousticRpmRef.current = finalRpm;
           setAcousticRpm(Math.round(finalRpm));

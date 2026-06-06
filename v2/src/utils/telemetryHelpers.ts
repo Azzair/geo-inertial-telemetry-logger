@@ -134,7 +134,12 @@ export function convertToCSV(records: any[], comment?: string): string {
 
   for (const r of records) {
     const absTimeStr = formatAbsoluteTime(r.absTime || Date.now());
-    const relTimeStr = ((r.timestamp || 0) / 1000).toFixed(3);
+    const totalMs = r.timestamp || 0;
+    const wholeSec = Math.floor(totalMs / 1000);
+    const msPortion = Math.floor(totalMs % 1000);
+    const wholeSecPadded = String(wholeSec).padStart(2, "0");
+    const msPadded = String(msPortion).padStart(3, "0");
+    const relTimeStr = `${wholeSecPadded}.${msPadded}`;
     const row = [
       absTimeStr,
       relTimeStr,
