@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Geo-Inertial Telemetry Suite</title>
+    <!-- PWA Settings -->
+    <link rel="manifest" href="/geo-inertial-telemetry-logger/v1/manifest.json" />
+    <meta name="theme-color" content="#020617" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="GeoTelemetry" />
+    <link rel="icon" type="image/svg+xml" href="/geo-inertial-telemetry-logger/v1/icon.svg" />
+    <link rel="apple-touch-icon" href="/geo-inertial-telemetry-logger/v1/icon-512.png" />
+    
+    <!-- Register Service Worker -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => {
+              console.log('Service Worker registered successfully under scope:', reg.scope);
+            })
+            .catch(err => {
+              console.error('Service Worker registration failed:', err);
+            });
+        });
+      }
+    </script>
+    <script type="module" crossorigin src="/geo-inertial-telemetry-logger/v1/assets/index-D8YG5UMW.js"></script>
+    <link rel="stylesheet" crossorigin href="/geo-inertial-telemetry-logger/v1/assets/index-CeFjaD0y.css">
+  <link rel="manifest" href="/geo-inertial-telemetry-logger/v1/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/geo-inertial-telemetry-logger/v1/registerSW.js"></script></head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
+

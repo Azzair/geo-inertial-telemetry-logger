@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/geo-inertial-telemetry-logger/v1/sw.js', { scope: '/geo-inertial-telemetry-logger/v1/' })})}
