@@ -11,6 +11,8 @@ import SlideMetrics from "./components/SlideMetrics";
 import SlideCharts from "./components/SlideCharts";
 import SlideHistory from "./components/SlideHistory";
 import SlideUtilities from "./components/SlideUtilities";
+import { InstallPWAButton } from "./components/InstallPWAButton";
+import { ReloadPrompt } from "./components/ReloadPrompt";
 
 export default function App() {
   const {
@@ -93,6 +95,7 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-2">
+            <InstallPWAButton />
             {recordingState === "recording" && (
               <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-500/10 border border-red-500/20">
                 <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
@@ -258,6 +261,8 @@ export default function App() {
           <p className="text-[10px] text-slate-600">Сенсори: Векторне інтегрування з затуханням нульового зміщення для запобігання похибкам.</p>
         </div>
       </footer>
+
+      <ReloadPrompt />
 
     </div>
   );
