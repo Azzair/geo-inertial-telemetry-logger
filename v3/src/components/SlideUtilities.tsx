@@ -18,12 +18,12 @@ interface SlideUtilitiesProps {
   
   // Quick diagnostics data
   currentIMU: {
-    ax: number;
-    ay: number;
-    az: number;
-    gx: number;
-    gy: number;
-    gz: number;
+    accelX: number;
+    accelY: number;
+    accelZ: number;
+    gyroX: number;
+    gyroY: number;
+    gyroZ: number;
   };
   offsetCalib: {
     accelOffsetX: number;
@@ -68,7 +68,7 @@ export default function SlideUtilities({
           <div className="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
             <Wrench className="w-6 h-6 animate-pulse" />
           </div>
-          <div className="space-y-1.5ClassName bg-indigo-500/10 ring-1 ring-cyan-500">
+          <div className="space-y-1.5">
             <h2 className="text-base font-bold text-slate-100">Лабораторія утиліт та математичних тестів</h2>
             <p className="text-xs text-slate-400 max-w-2xl leading-relaxed">
               Додаткові інструменти обробки фізичних спектрів, калібрування інерційного обчислювального блоку та тонке тестування механічних коливань.
@@ -116,38 +116,38 @@ export default function SlideUtilities({
           <div className="bg-slate-950 p-3 rounded-xl border border-slate-850/80 space-y-1">
             <span className="text-[10px] text-slate-500 font-mono block uppercase">Прискорення X (Ax)</span>
             <span className="text-sm font-bold font-mono text-slate-200">
-              {currentIMU.ax ? `${currentIMU.ax.toFixed(4)} м/с²` : "0.0000 м/с²"}
+              {currentIMU.accelX !== undefined ? `${currentIMU.accelX.toFixed(4)} м/с²` : "0.0000 м/с²"}
             </span>
           </div>
           <div className="bg-slate-950 p-3 rounded-xl border border-slate-850/80 space-y-1">
             <span className="text-[10px] text-slate-500 font-mono block uppercase">Прискорення Y (Ay)</span>
             <span className="text-sm font-bold font-mono text-slate-200">
-              {currentIMU.ay ? `${currentIMU.ay.toFixed(4)} м/с²` : "0.0000 м/с²"}
+              {currentIMU.accelY !== undefined ? `${currentIMU.accelY.toFixed(4)} м/с²` : "0.0000 м/с²"}
             </span>
           </div>
           <div className="bg-slate-950 p-3 rounded-xl border border-slate-850/80 space-y-1 col-span-2 md:col-span-1">
             <span className="text-[10px] text-slate-500 font-mono block uppercase">Прискорення Z (Az)</span>
             <span className="text-sm font-bold font-mono text-slate-200">
-              {currentIMU.az ? `${currentIMU.az.toFixed(4)} м/с²` : "9.8066 м/с²"}
+              {currentIMU.accelZ !== undefined ? `${currentIMU.accelZ.toFixed(4)} м/с²` : "9.8066 м/с²"}
             </span>
           </div>
 
           <div className="bg-slate-950 p-3 rounded-xl border border-slate-850/80 space-y-1">
             <span className="text-[10px] text-slate-500 font-mono block uppercase">Гіроскоп X (Pitch Rate)</span>
             <span className="text-sm font-semibold font-mono text-slate-350 text-slate-300">
-              {currentIMU.gx ? `${(currentIMU.gx * (180 / Math.PI)).toFixed(2)} °/с` : "0.00 °/с"}
+              {currentIMU.gyroX !== undefined ? `${(currentIMU.gyroX * (180 / Math.PI)).toFixed(2)} °/с` : "0.00 °/с"}
             </span>
           </div>
           <div className="bg-slate-950 p-3 rounded-xl border border-slate-850/80 space-y-1">
             <span className="text-[10px] text-slate-500 font-mono block uppercase">Гіроскоп Y (Roll Rate)</span>
             <span className="text-sm font-semibold font-mono text-slate-300">
-              {currentIMU.gy ? `${(currentIMU.gy * (180 / Math.PI)).toFixed(2)} °/с` : "0.00 °/с"}
+              {currentIMU.gyroY !== undefined ? `${(currentIMU.gyroY * (180 / Math.PI)).toFixed(2)} °/с` : "0.00 °/с"}
             </span>
           </div>
           <div className="bg-slate-950 p-3 rounded-xl border border-slate-850/80 space-y-1 col-span-2 md:col-span-1">
             <span className="text-[10px] text-slate-500 font-mono block uppercase">Гіроскоп Z (Yaw Rate)</span>
             <span className="text-sm font-semibold font-mono text-slate-300">
-              {currentIMU.gz ? `${(currentIMU.gz * (180 / Math.PI)).toFixed(2)} °/с` : "0.00 °/с"}
+              {currentIMU.gyroZ !== undefined ? `${(currentIMU.gyroZ * (180 / Math.PI)).toFixed(2)} °/с` : "0.00 °/с"}
             </span>
           </div>
         </div>

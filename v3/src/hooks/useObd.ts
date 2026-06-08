@@ -307,8 +307,13 @@ export function useObd(
         device = await (navigator as any).bluetooth.requestDevice({
           acceptAllDevices: true,
           optionalServices: [
-            "6e400001-b5a3-f393-e0a9-e50e24dcca9e", // Nordic UART service
-            "0000fff0-0000-1000-8000-00805f9b34fb"  // General Serial Pass-through service
+            "6e400001-b5a3-f393-e0a9-e50e24dcca9e", // Nordic UART NUS
+            "0000ffe0-0000-1000-8000-00805f9b34fb", // HM-10 / CC2541 UART (extremely common on cheap ELM327 BLE)
+            "0000fff0-0000-1000-8000-00805f9b34fb", // General Serial Pass-through (V-Link / Carista)
+            "000018f0-0000-1000-8000-00805f9b34fb", // Viecar OBD-II target
+            "49535343-fe7d-4ae5-8fa9-9fafd205e455", // Microchip / RN4871 UART
+            "e7810a71-73ae-499d-8c15-faa9ae1c2c61", // Bluegiga BLE112/113
+            "0000fdf0-0000-1000-8000-00805f9b34fb"  // OBDLink MX+ custom BLE
           ]
         });
       }
@@ -321,33 +326,69 @@ export function useObd(
       let txCharacteristic: any = null;
       let rxCharacteristic: any = null;
 
+      // 1. Scan dynamically through discovered services
       const services = await server.getPrimaryServices();
       for (const s of services) {
-        console.log("Primary BLE service:", s.uuid);
+        console.log("Primary BLE service found:", s.uuid);
         try {
           const chars = await s.getCharacteristics();
+          let localTx = null;
+          let localRx = null;
           for (const c of chars) {
             if (c.properties.write || c.properties.writeWithoutResponse) {
-              txCharacteristic = c;
+              localTx = c;
             }
             if (c.properties.notify || c.properties.indicate) {
-              rxCharacteristic = c;
+              localRx = c;
             }
           }
+          // Prioritize finding them in the same service to maintain consistency
+          if (localTx && localRx) {
+            txCharacteristic = localTx;
+            rxCharacteristic = localRx;
+            console.log("Configured TX/RX pairs in service:", s.uuid);
+            break;
+          }
         } catch (charError) {
-          console.warn("Could not retrieve characteristics for service: ", s.uuid, charError);
+          console.warn("Could not retrieve characteristics for service:", s.uuid, charError);
         }
-        if (txCharacteristic && rxCharacteristic) break;
+      }
+
+      // 2. Direct fallback lookup if dynamic scanning was blocked
+      if (!txCharacteristic || !rxCharacteristic) {
+        const fallbackServices = [
+          "0000ffe0-0000-1000-8000-00805f9b34fb", // HM-10
+          "6e400001-b5a3-f393-e0a9-e50e24dcca9e", // NUS
+          "0000fff0-0000-1000-8000-00805f9b34fb"  // General Serial Pass-through
+        ];
+        
+        for (const uuid of fallbackServices) {
+          try {
+            console.log("Direct fallback lookup for service:", uuid);
+            const service = await server.getPrimaryService(uuid);
+            const chars = await service.getCharacteristics();
+            let localTx = null;
+            let localRx = null;
+            for (const c of chars) {
+              if (c.properties.write || c.properties.writeWithoutResponse) {
+                localTx = c;
+              }
+              if (c.properties.notify || c.properties.indicate) {
+                localRx = c;
+              }
+            }
+            if (localTx && localRx) {
+              txCharacteristic = localTx;
+              rxCharacteristic = localRx;
+              console.log("Fallbacked successfully via direct service lookup of:", uuid);
+              break;
+            }
+          } catch (errDirect) {}
+        }
       }
 
       if (!txCharacteristic || !rxCharacteristic) {
-        try {
-          const service = await server.getPrimaryService("6e400001-b5a3-f393-e0a9-e50e24dcca9e");
-          txCharacteristic = await service.getCharacteristic("6e400002-b5a3-f393-e0a9-e50e24dcca9e");
-          rxCharacteristic = await service.getCharacteristic("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
-        } catch (errFallback) {
-          throw new Error("Не вдалося ідентифікувати UART сервіс прийому/передачі даних. Перевірте сумісність вашого BLE адаптера.");
-        }
+        throw new Error("Не вдалося ідентифікувати сервіс передачі даних на вашому адаптері. Переконайтеся, що це BLE (а не Bluetooth 2.0/3.0 Classic) та що він підтримує стандартний BLE serial pass-through.");
       }
 
       await rxCharacteristic.startNotifications();
@@ -491,22 +532,56 @@ export function useObd(
             for (const s of services) {
               try {
                 const chars = await s.getCharacteristics();
+                let localTx = null;
+                let localRx = null;
                 for (const c of chars) {
                   if (c.properties.write || c.properties.writeWithoutResponse) {
-                    txCharacteristic = c;
+                    localTx = c;
                   }
                   if (c.properties.notify || c.properties.indicate) {
-                    rxCharacteristic = c;
+                    localRx = c;
                   }
                 }
+                if (localTx && localRx) {
+                  txCharacteristic = localTx;
+                  rxCharacteristic = localRx;
+                  break;
+                }
               } catch (errChars) {}
-              if (txCharacteristic && rxCharacteristic) break;
             }
             
             if (!txCharacteristic || !rxCharacteristic) {
-              const service = await server.getPrimaryService("6e400001-b5a3-f393-e0a9-e50e24dcca9e");
-              txCharacteristic = await service.getCharacteristic("6e400002-b5a3-f393-e0a9-e50e24dcca9e");
-              rxCharacteristic = await service.getCharacteristic("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
+              const fallbackServices = [
+                "0000ffe0-0000-1000-8000-00805f9b34fb", // HM-10
+                "6e400001-b5a3-f393-e0a9-e50e24dcca9e", // NUS
+                "0000fff0-0000-1000-8000-00805f9b34fb"  // General Serial Pass-through
+              ];
+              
+              for (const uuid of fallbackServices) {
+                try {
+                  const service = await server.getPrimaryService(uuid);
+                  const chars = await service.getCharacteristics();
+                  let localTx = null;
+                  let localRx = null;
+                  for (const c of chars) {
+                    if (c.properties.write || c.properties.writeWithoutResponse) {
+                      localTx = c;
+                    }
+                    if (c.properties.notify || c.properties.indicate) {
+                      localRx = c;
+                    }
+                  }
+                  if (localTx && localRx) {
+                    txCharacteristic = localTx;
+                    rxCharacteristic = localRx;
+                    break;
+                  }
+                } catch (errDirect) {}
+              }
+            }
+
+            if (!txCharacteristic || !rxCharacteristic) {
+              throw new Error("Could not find UART characteristics on auto-reconnected BLE device.");
             }
             
             await rxCharacteristic.startNotifications();

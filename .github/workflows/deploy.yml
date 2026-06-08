@@ -33,6 +33,18 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Install dependencies and build v1
+        working-directory: ./v1
+        run: |
+          npm install
+          npm run build
+
+      - name: Install dependencies and build v2
+        working-directory: ./v2
+        run: |
+          npm install
+          npm run build
+
       - name: Install dependencies and build v3
         working-directory: ./v3
         run: |
@@ -41,8 +53,10 @@ jobs:
 
       - name: Prepare Deployment Directory
         run: |
-          mkdir -p deployment_artifact/v3
+          mkdir -p deployment_artifact/v1 deployment_artifact/v2 deployment_artifact/v3
           cp index.html deployment_artifact/
+          cp -r v1/dist/* deployment_artifact/v1/
+          cp -r v2/dist/* deployment_artifact/v2/
           cp -r v3/dist/* deployment_artifact/v3/
 
       - name: Upload artifact

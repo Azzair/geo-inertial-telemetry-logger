@@ -992,6 +992,80 @@ export function useTelemetryLogger() {
     });
   };
 
+  // Live, real-time telemetry diagnostics visualizer when NOT aggressively recording a session
+  useEffect(() => {
+    if (recordingState === "recording") return;
+
+    const liveDiagnosticTimer = setInterval(() => {
+      const ax = filteredSensorBuffer.current.ax;
+      const ay = filteredSensorBuffer.current.ay;
+      const az = filteredSensorBuffer.current.az;
+      const gx = filteredSensorBuffer.current.gx;
+      const gy = filteredSensorBuffer.current.gy;
+      const gz = filteredSensorBuffer.current.gz;
+
+      const rawAx = rawSensorBuffer.current.ax;
+      const rawAy = rawSensorBuffer.current.ay;
+      const rawAz = rawSensorBuffer.current.az;
+      const rawAccelMag = Math.sqrt(rawAx * rawAx + rawAy * rawAy + rawAz * rawAz);
+
+      // Continuously update IMU state for live diagnostics/calibration UI preview
+      setCurrentIMU({
+        accelX: ax,
+        accelY: ay,
+        accelZ: az,
+        accelRawMag: rawAccelMag,
+        gyroX: gx,
+        gyroY: gy,
+        gyroZ: gz,
+        speedIMU: integratedImuVelocity.current,
+        distIMU: integratedImuDistance.current,
+        accelIMU: Math.sqrt(ax * ax + ay * ay + az * az),
+        heightIMU: integratedImuAltitude.current
+      });
+
+      // Update extra phone sensory variables
+      let livePressure = devicePressure.current;
+      if (livePressure === null) {
+        const alt = gpsBuffer.current.alt || 145;
+        livePressure = 1013.25 * Math.pow(1 - alt / 44330, 5.255);
+      }
+      livePressure = parseFloat(livePressure.toFixed(2));
+
+      if (startBaroPressure.current === null) {
+        startBaroPressure.current = livePressure;
+      }
+      const liveHeightBaro = 44330 * (1 - Math.pow(livePressure / startBaroPressure.current, 1 / 5.255));
+
+      setCurrentExtraSensors({
+        magX: parseFloat(magnetometerField.current.x.toFixed(3)),
+        magY: parseFloat(magnetometerField.current.y.toFixed(3)),
+        magZ: parseFloat(magnetometerField.current.z.toFixed(3)),
+        heading: parseFloat(deviceOrientation.current.alpha.toFixed(1)),
+        pitch: parseFloat(deviceOrientation.current.beta.toFixed(1)),
+        roll: parseFloat(deviceOrientation.current.gamma.toFixed(1)),
+        baroPressure: livePressure,
+        calcHeightBaro: parseFloat(liveHeightBaro.toFixed(2)),
+        noiseLevelDb: microphoneSoundDb.current,
+        lightLux: ambientLightLux.current,
+        batteryLevel: batteryInfo.current.level,
+        batteryCharging: batteryInfo.current.charging
+      });
+
+      // Sync active GPS buffer state
+      setCurrentGPS({
+        lat: gpsBuffer.current.lat,
+        lon: gpsBuffer.current.lon,
+        alt: gpsBuffer.current.alt,
+        speed: gpsBuffer.current.speed,
+        distance: accumulatedGpsDistance.current,
+        accel: lastGpsSpeed.current
+      });
+    }, 100); // 10Hz update is highly responsive and friendly to high-framerate rendering
+
+    return () => clearInterval(liveDiagnosticTimer);
+  }, [recordingState]);
+
   // Tick generator core
   useEffect(() => {
     if (recordingState !== "recording") {
