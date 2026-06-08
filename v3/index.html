@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Geo-Inertial Telemetry Suite</title>
+    <!-- PWA Settings -->
+    <link rel="manifest" href="./manifest.json" />
+    <meta name="theme-color" content="#020617" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="GeoTelemetry" />
+    <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+    <link rel="apple-touch-icon" href="./icon-512.png" />
+    
+    <!-- Register/Unregister Service Worker -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        // Unregister service worker in preview and development environments to avoid stale caching
+        const isDev = window.location.hostname.includes('run.app') || window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0.1');
+        if (isDev) {
+          navigator.serviceWorker.getRegistrations().then((registrations) => {
+            for (let registration of registrations) {
+              registration.unregister().then(() => {
+                console.log('Unregistered Service Worker in development to prevent stale caches.');
+              });
+            }
+          });
+          // Also clear Cache Storage in dev
+          if ('caches' in window) {
+            caches.keys().then((names) => {
+              for (let name of names) {
+                caches.delete(name);
+              }
+            });
+          }
+        } else {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js')
+              .then(reg => {
+                console.log('Service Worker registered successfully under scope:', reg.scope);
+              })
+              .catch(err => {
+                console.error('Service Worker registration failed:', err);
+              });
+          });
+        }
+      }
+    </script>
+    <script type="module" crossorigin src="./assets/index-BLYYpAd5.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-B0Bg7QGJ.css">
+  <link rel="manifest" href="./manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="./registerSW.js"></script></head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
+
