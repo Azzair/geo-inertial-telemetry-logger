@@ -64,6 +64,9 @@ export default function SlideUtilities({
       {/* HEADER BANNER */}
       <section className="bg-gradient-to-r from-slate-900 via-indigo-950/20 to-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden" id="utilities_banner">
         <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-505/10 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-3 right-3 px-2 py-0.5 bg-slate-950/80 border border-slate-800/80 rounded shadow-sm text-[9px] font-mono text-slate-400 z-20">
+          v{import.meta.env.VITE_APP_VERSION || "3.0.0-dev"}
+        </div>
         <div className="flex items-start gap-4 z-10 relative">
           <div className="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
             <Wrench className="w-6 h-6 animate-pulse" />

@@ -47,6 +47,8 @@ jobs:
 
       - name: Install dependencies and build v3
         working-directory: ./v3
+        env:
+          VITE_APP_VERSION: 3.0.${{ github.run_number }}
         run: |
           npm install
           npm run build
