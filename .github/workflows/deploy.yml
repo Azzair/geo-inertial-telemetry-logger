@@ -7,6 +7,10 @@ on:
   # Дозволяє запускати workflow вручну з вкладки Actions
   workflow_dispatch:
 
+# Примусово використовуємо Node.js 24 для виконання екшенів (виправляє попередження про Node.js 20)
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 # Налаштування прав доступу, необхідних для GitHub Pages
 permissions:
   contents: read
@@ -31,7 +35,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install dependencies and build v1
         working-directory: ./v1
