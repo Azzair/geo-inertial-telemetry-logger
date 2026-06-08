@@ -1,0 +1,55 @@
+name: Deploy to GitHub Pages
+
+on:
+  # Запускати автоматично при кожному пуші в гілку main
+  push:
+    branches: ["main"]
+  # Дозволяє запускати workflow вручну з вкладки Actions
+  workflow_dispatch:
+
+# Налаштування прав доступу, необхідних для GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Запобігає паралельному виконанню кількох збірок для уникнення конфліктів
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies and build v3
+        working-directory: ./v3
+        run: |
+          npm install
+          npm run build
+
+      - name: Prepare Deployment Directory
+        run: |
+          mkdir -p deployment_artifact/v3
+          cp index.html deployment_artifact/
+          cp -r v3/dist/* deployment_artifact/v3/
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './deployment_artifact'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
