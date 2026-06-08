@@ -15,6 +15,13 @@
     <link rel="apple-touch-icon" href="./icon-512.png" />
   </head>
   <body>
+    <script>
+      window.__PWA_INSTALL_EVENT__ = null;
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        window.__PWA_INSTALL_EVENT__ = e;
+      });
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

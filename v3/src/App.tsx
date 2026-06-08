@@ -85,7 +85,7 @@ export default function App() {
               <h1 className="text-base font-bold tracking-tight text-slate-100 flex items-center gap-2">
                 Geo-Inertial Telemetry Suite
                 <span className="text-[10px] bg-indigo-900/30 text-indigo-300 font-mono font-bold py-0.5 px-2 rounded-full border border-indigo-500/20">
-                  v3.0.0
+                  v{import.meta.env.VITE_APP_VERSION || "3.0.0-dev"}
                 </span>
               </h1>
               <p className="text-[11px] text-slate-400 hidden sm:block">

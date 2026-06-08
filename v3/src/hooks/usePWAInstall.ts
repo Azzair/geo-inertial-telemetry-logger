@@ -12,7 +12,9 @@ interface BeforeInstallPromptEvent extends Event {
 
 export function usePWAInstall() {
   const [installEvent, setInstallEvent] =
-    useState<BeforeInstallPromptEvent | null>(null);
+    useState<BeforeInstallPromptEvent | null>(
+      (window as any).__PWA_INSTALL_EVENT__ || null,
+    );
 
   useEffect(() => {
     const handler = (e: Event) => {
