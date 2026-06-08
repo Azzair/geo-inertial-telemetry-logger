@@ -1,1 +1,106 @@
-if(!self.define){let e,s={};const i=(i,n)=>(i=new URL(i+".js",n).href,s[i]||new Promise(s=>{if("document"in self){const e=document.createElement("script");e.src=i,e.onload=s,document.head.appendChild(e)}else e=i,importScripts(i),s()}).then(()=>{let e=s[i];if(!e)throw new Error(`Module ${i} didn’t register its module`);return e}));self.define=(n,r)=>{const t=e||("document"in self?document.currentScript.src:"")||location.href;if(s[t])return;let o={};const l=e=>i(e,t),d={module:{uri:t},exports:o,require:l};s[t]=Promise.all(n.map(e=>d[e]||l(e))).then(e=>(r(...e),o))}}define(["./workbox-9c191d2f"],function(e){"use strict";self.skipWaiting(),e.clientsClaim(),e.precacheAndRoute([{url:"registerSW.js",revision:"402b66900e731ca748771b6fc5e7a068"},{url:"index.html",revision:"adb4858e50f96e409e78042e31263240"},{url:"assets/index-BLYYpAd5.js",revision:null},{url:"assets/index-B0Bg7QGJ.css",revision:null},{url:"manifest.webmanifest",revision:"8d729bbe07c2b269db64d43d460d6ca3"}],{}),e.cleanupOutdatedCaches(),e.registerRoute(new e.NavigationRoute(e.createHandlerBoundToURL("index.html")))});
+const CACHE_NAME = 'geotelemetry-cache-v3';
+const ASSETS_TO_CACHE = [
+  './',
+  'index.html',
+  'manifest.json',
+  'icon.svg',
+  'icon-512.png'
+];
+
+self.addEventListener('install', (event) => {
+  const isDev = self.location.hostname.includes('run.app') || 
+                self.location.hostname.includes('localhost') || 
+                self.location.hostname.includes('127.0.0.1');
+  if (isDev) {
+    self.skipWaiting();
+    return;
+  }
+
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS_TO_CACHE);
+    }).then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
+      );
+    }).then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('fetch', (event) => {
+  // Skip caching non-GET requests
+  if (event.request.method !== 'GET') return;
+
+  // Check if we are in development/preview environment
+  const isDev = self.location.hostname.includes('run.app') || 
+                self.location.hostname.includes('localhost') || 
+                self.location.hostname.includes('127.0.0.1');
+
+  if (isDev) {
+    // In development/preview, bypass cache entirely
+    return;
+  }
+
+  // Normalize request URLs (e.g., skip extensions, chrome-extension:// schemes)
+  if (!event.request.url.startsWith(self.location.origin)) {
+    // For external APIs like open-meteo, try network first, then return static offline fallback if needed
+    if (event.request.url.includes('api.open-meteo') || event.request.url.includes('weather')) {
+      event.respondWith(
+        fetch(event.request).catch(() => {
+          return new Response(JSON.stringify({ 
+            current:{ temperature_2m: 18.5, weather_code: 0 },
+            daily:{ temperature_2m_max: [22.0], temperature_2m_min: [14.0] }
+          }), {
+            headers: { 'Content-Type': 'application/json' }
+          });
+        })
+      );
+    }
+    return;
+  }
+
+  // Intercept application files with a Cache-First, Fallback-to-Network, stale-revalidate hybrid approach
+  event.respondWith(
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) {
+        // Fetch fresh copy in background to update cache for next time
+        fetch(event.request).then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, networkResponse);
+            });
+          }
+        }).catch(() => {/* Ignore background sync failures when offline */});
+        
+        return cachedResponse;
+      }
+
+      // No cached value, query network
+      return fetch(event.request).then((networkResponse) => {
+        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+          return networkResponse;
+        }
+
+        const responseToCache = networkResponse.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, responseToCache);
+        });
+
+        return networkResponse;
+      }).catch((error) => {
+        // Offline and not in cache
+        console.warn('Network request failed and asset is not cached:', error);
+      });
+    })
+  );
+});
