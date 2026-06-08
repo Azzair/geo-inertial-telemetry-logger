@@ -35,6 +35,8 @@ export function usePWAInstall() {
     await installEvent.prompt();
     // Чекаємо на відповідь користувача
     await installEvent.userChoice;
+    // Приховуємо кнопку після успішного встановлення
+    setInstallEvent(null);
   };
 
   return { isInstallable: !!installEvent, promptInstall };
