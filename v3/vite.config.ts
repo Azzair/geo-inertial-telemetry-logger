@@ -6,7 +6,7 @@ import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig(() => {
   return {
-    base: "/geo-inertial-telemetry-logger/v3/",
+    base: "./",
     plugins: [
       react(),
       tailwindcss(),
